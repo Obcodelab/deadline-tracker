@@ -1,0 +1,20 @@
+model User {
+  pkid                   Int                 @unique @default(autoincrement())
+  id                     String              @id @default(uuid()) @db.Uuid
+  emailAddress           String              @unique
+  password               String?
+  fullName               String
+  department             String?
+  faculty                String?
+  isEmailVerified        Boolean             @default(false)
+  oauthProvider          OAuthProvider       @default(EMAIL)
+  lastLoginAt            DateTime?
+  verificationToken      VerificationToken[]
+  passwordResetToken     String?
+  passwordResetExpiresAt DateTime?
+  hashedRefreshToken     String?
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime            @updatedAt
+
+  @@map("users")
+}

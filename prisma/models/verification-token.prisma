@@ -1,0 +1,13 @@
+model VerificationToken {
+  pkid      Int       @unique @default(autoincrement())
+  id        String    @id @default(uuid()) @db.Uuid
+  code      String
+  expiresAt DateTime
+  usedAt    DateTime?
+  userId    String    @db.Uuid
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@map("verification_tokens")
+}
