@@ -17,7 +17,10 @@ import {
   DeadlineStatus,
 } from '../dtos/deadline-response.dto';
 import { DeadlineErrors } from '../../common/app.errors';
-import { buildPaginationMeta, getPaginationParams } from '../../common/pagination.util';
+import {
+  buildPaginationMeta,
+  getPaginationParams,
+} from '../../common/pagination.util';
 
 const DEADLINE_INCLUDE = {
   course: { select: { id: true, name: true, code: true, color: true } },
@@ -115,7 +118,9 @@ export class DeadlinesService {
     );
   }
 
-  private toListItemDto(deadline: DeadlineListRow): DeadlineListItemResponseDto {
+  private toListItemDto(
+    deadline: DeadlineListRow,
+  ): DeadlineListItemResponseDto {
     const { dueDate, dueTime } = this.splitDueAt(deadline.dueAt);
     const completedCount = deadline.checklistItems.filter(
       (item) => item.isComplete,

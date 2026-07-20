@@ -15,7 +15,7 @@ export const envValidationSchema = Joi.object({
   GOOGLE_CLIENT_SECRET: Joi.string().required(),
   GOOGLE_CALLBACK_URL: Joi.string().uri().required(),
   CORS_ORIGINS: Joi.string()
-    .custom((value, helpers) => {
+    .custom((value: string, helpers: Joi.CustomHelpers) => {
       let parsed: unknown;
       try {
         parsed = JSON.parse(value);

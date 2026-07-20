@@ -4,14 +4,19 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CoursesService } from '../../courses/services/courses.service';
 import { DashboardQueryDto } from '../dtos/dashboard-query.dto';
-import { DashboardItemDto, DashboardResponseDto } from '../dtos/dashboard-response.dto';
+import {
+  DashboardItemDto,
+  DashboardResponseDto,
+} from '../dtos/dashboard-response.dto';
 
 const DASHBOARD_INCLUDE = {
   course: { select: { id: true, name: true, code: true, color: true } },
   checklistItems: { select: { isComplete: true } },
 } satisfies Prisma.DeadlineInclude;
 
-type DashboardDeadline = Prisma.DeadlineGetPayload<{ include: typeof DASHBOARD_INCLUDE }>;
+type DashboardDeadline = Prisma.DeadlineGetPayload<{
+  include: typeof DASHBOARD_INCLUDE;
+}>;
 
 type DashboardBucket = 'overdue' | 'today' | 'thisWeek' | 'later';
 
@@ -116,7 +121,9 @@ export class DashboardService {
     };
 
     for (const deadline of deadlines) {
-      buckets[this.bucketFor(deadline.dueAt)].push(this.toDashboardItem(deadline));
+      buckets[this.bucketFor(deadline.dueAt)].push(
+        this.toDashboardItem(deadline),
+      );
     }
 
     return plainToInstance(DashboardResponseDto, buckets, {

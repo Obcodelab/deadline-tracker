@@ -4,7 +4,7 @@ import { CommonErrors } from './app.errors';
 
 @Injectable()
 export class AppThrottlerGuard extends ThrottlerGuard {
-  protected async throwThrottlingException(): Promise<void> {
+  protected throwThrottlingException(): Promise<void> {
     throw CommonErrors.tooManyRequests();
   }
 }

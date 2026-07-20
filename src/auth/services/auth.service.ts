@@ -11,7 +11,10 @@ import {
   SignUpDto,
   VerifyOtpDto,
 } from '../dtos/auth.dto';
-import { LoginResponseDto, TokenPairResponseDto } from '../dtos/auth-response.dto';
+import {
+  LoginResponseDto,
+  TokenPairResponseDto,
+} from '../dtos/auth-response.dto';
 import { PrismaService } from '../../prisma/prisma.service';
 import { UsersService } from '../../users/services/users.service';
 import { JwtService } from '@nestjs/jwt';

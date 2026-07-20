@@ -4,7 +4,11 @@ import { plainToInstance } from 'class-transformer';
 import { CourseRole } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { UsersService } from '../../users/services/users.service';
-import { CreateCourseDto, JoinCourseDto, UpdateCourseDto } from '../dtos/course.dto';
+import {
+  CreateCourseDto,
+  JoinCourseDto,
+  UpdateCourseDto,
+} from '../dtos/course.dto';
 import {
   CourseMemberResponseDto,
   CourseMembershipResponseDto,
@@ -12,7 +16,10 @@ import {
 } from '../dtos/course-response.dto';
 import { AuthErrors, CourseErrors } from '../../common/app.errors';
 import { PaginationQueryDto } from '../../common/dtos/pagination-query.dto';
-import { buildPaginationMeta, getPaginationParams } from '../../common/pagination.util';
+import {
+  buildPaginationMeta,
+  getPaginationParams,
+} from '../../common/pagination.util';
 
 const JOIN_CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const JOIN_CODE_LENGTH = 8;

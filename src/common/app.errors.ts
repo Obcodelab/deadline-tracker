@@ -149,16 +149,13 @@ export class CourseErrors {
   }
 
   static codeAlreadyExists(code: string) {
-    return new ConflictException(
-      'You already have a course with this code.',
-      {
-        code: 'COURSE_CODE_ALREADY_EXISTS',
-        detail: {
-          field: 'code',
-          value: code,
-        },
+    return new ConflictException('You already have a course with this code.', {
+      code: 'COURSE_CODE_ALREADY_EXISTS',
+      detail: {
+        field: 'code',
+        value: code,
       },
-    );
+    });
   }
 
   static notOwner() {
@@ -171,12 +168,9 @@ export class CourseErrors {
   }
 
   static notMember() {
-    return new ForbiddenException(
-      'You are not a member of this course.',
-      {
-        code: 'NOT_COURSE_MEMBER',
-      },
-    );
+    return new ForbiddenException('You are not a member of this course.', {
+      code: 'NOT_COURSE_MEMBER',
+    });
   }
 
   static invalidJoinCode() {

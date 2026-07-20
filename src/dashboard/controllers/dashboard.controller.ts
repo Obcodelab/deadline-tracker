@@ -12,7 +12,10 @@ export class DashboardController {
 
   @Get('')
   @SuccessMessage('Dashboard retrieved successfully.')
-  getDashboard(@CurrentUser() user: JwtUser, @Query() query: DashboardQueryDto) {
+  getDashboard(
+    @CurrentUser() user: JwtUser,
+    @Query() query: DashboardQueryDto,
+  ) {
     return this.dashboardService.getDashboard(user.id, query);
   }
 }
