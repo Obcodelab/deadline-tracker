@@ -1,4 +1,10 @@
-import { IsNotEmpty, IsOptional, IsString, Matches } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Matches,
+  MaxLength,
+} from 'class-validator';
 
 export class UpdateProfileDto {
   @IsOptional()
@@ -12,6 +18,11 @@ export class UpdateProfileDto {
   @IsOptional()
   @IsString()
   faculty?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(300)
+  bio?: string;
 }
 
 export class ChangePasswordDto {

@@ -1,0 +1,14 @@
+model CourseMember {
+  pkid     Int        @unique @default(autoincrement())
+  id       String     @id @default(uuid()) @db.Uuid
+  courseId String     @db.Uuid
+  course   Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  userId   String     @db.Uuid
+  user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role     CourseRole @default(MEMBER)
+  joinedAt DateTime   @default(now())
+
+  @@unique([courseId, userId])
+  @@index([userId])
+  @@map("course_members")
+}

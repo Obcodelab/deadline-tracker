@@ -6,6 +6,7 @@ model User {
   fullName               String
   department             String?
   faculty                String?
+  bio                    String?
   isEmailVerified        Boolean             @default(false)
   oauthProvider          OAuthProvider       @default(EMAIL)
   lastLoginAt            DateTime?
@@ -13,6 +14,9 @@ model User {
   passwordResetToken     String?
   passwordResetExpiresAt DateTime?
   hashedRefreshToken     String?
+  ownedCourses           Course[]
+  courseMemberships      CourseMember[]
+  createdDeadlines       Deadline[]
   createdAt              DateTime            @default(now())
   updatedAt              DateTime            @updatedAt
 

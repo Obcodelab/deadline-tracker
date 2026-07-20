@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import { plainToInstance } from 'class-transformer';
 import { PrismaService } from '../../prisma/prisma.service';
 import { OAuthProvider, User } from '@prisma/client';
 import { ChangePasswordDto, UpdateProfileDto } from '../dtos/user.dto';
+import { UserProfileResponseDto } from '../dtos/user-response.dto';
 import { AuthErrors, UserErrors } from '../../common/app.errors';
 
 @Injectable()
@@ -45,7 +47,7 @@ export class UsersService {
   }
 
   async findById(id: string) {
-    return this.prisma.user.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: { id },
       select: {
         id: true,
@@ -53,9 +55,18 @@ export class UsersService {
         emailAddress: true,
         department: true,
         faculty: true,
+        bio: true,
         isEmailVerified: true,
         createdAt: true,
       },
+    });
+
+    if (!user) {
+      return null;
+    }
+
+    return plainToInstance(UserProfileResponseDto, user, {
+      excludeExtraneousValues: true,
     });
   }
 
@@ -68,7 +79,7 @@ export class UsersService {
   }
 
   async updateProfile(id: string, dto: UpdateProfileDto) {
-    return this.prisma.user.update({
+    const user = await this.prisma.user.update({
       where: { id },
       data: dto,
       select: {
@@ -77,7 +88,14 @@ export class UsersService {
         emailAddress: true,
         department: true,
         faculty: true,
+        bio: true,
+        isEmailVerified: true,
+        createdAt: true,
       },
+    });
+
+    return plainToInstance(UserProfileResponseDto, user, {
+      excludeExtraneousValues: true,
     });
   }
 

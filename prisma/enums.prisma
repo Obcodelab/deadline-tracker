@@ -2,3 +2,25 @@ enum OAuthProvider {
   EMAIL
   GOOGLE
 }
+
+enum AcademicTerm {
+  FIRST_SEMESTER
+  SECOND_SEMESTER
+}
+
+enum CourseRole {
+  OWNER
+  MEMBER
+}
+
+enum DeadlineType {
+  ASSIGNMENT
+  EXAM
+  MILESTONE
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}

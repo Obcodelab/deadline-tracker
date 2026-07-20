@@ -9,3 +9,15 @@ export interface ApiResponse<T> {
   data: T | null;
   error: ApiError | null;
 }
+
+export interface PaginationMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface Paginated<T> {
+  items: T[];
+  meta: PaginationMeta;
+}

@@ -38,3 +38,8 @@ export class ForbiddenException extends AppException {
     super(HttpStatus.FORBIDDEN, message, error);
   }
 }
+export class TooManyRequestsException extends AppException {
+  constructor(message: string, error: ApiError) {
+    super(HttpStatus.TOO_MANY_REQUESTS, message, error);
+  }
+}

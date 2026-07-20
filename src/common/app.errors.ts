@@ -1,7 +1,9 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   NotFoundException,
+  TooManyRequestsException,
   UnauthorizedException,
 } from './app.exception';
 
@@ -84,12 +86,9 @@ export class AuthErrors {
   }
 
   static emailNotVerified() {
-    return new UnauthorizedException(
-      'Please verify your email before logging in.',
-      {
-        code: 'EMAIL_NOT_VERIFIED',
-      },
-    );
+    return new UnauthorizedException('Please verify your email to continue.', {
+      code: 'EMAIL_NOT_VERIFIED',
+    });
   }
 
   static samePassword() {
@@ -128,5 +127,99 @@ export class UserErrors {
         code: 'PASSWORD_NOT_SET',
       },
     );
+  }
+}
+
+export class CommonErrors {
+  static tooManyRequests() {
+    return new TooManyRequestsException(
+      'Too many requests. Please try again later.',
+      {
+        code: 'TOO_MANY_REQUESTS',
+      },
+    );
+  }
+}
+
+export class CourseErrors {
+  static notFound() {
+    return new NotFoundException('Course not found.', {
+      code: 'COURSE_NOT_FOUND',
+    });
+  }
+
+  static codeAlreadyExists(code: string) {
+    return new ConflictException(
+      'You already have a course with this code.',
+      {
+        code: 'COURSE_CODE_ALREADY_EXISTS',
+        detail: {
+          field: 'code',
+          value: code,
+        },
+      },
+    );
+  }
+
+  static notOwner() {
+    return new ForbiddenException(
+      'Only the course owner can perform this action.',
+      {
+        code: 'NOT_COURSE_OWNER',
+      },
+    );
+  }
+
+  static notMember() {
+    return new ForbiddenException(
+      'You are not a member of this course.',
+      {
+        code: 'NOT_COURSE_MEMBER',
+      },
+    );
+  }
+
+  static invalidJoinCode() {
+    return new NotFoundException('Invalid join code.', {
+      code: 'INVALID_JOIN_CODE',
+    });
+  }
+
+  static alreadyMember() {
+    return new ConflictException('You are already a member of this course.', {
+      code: 'ALREADY_COURSE_MEMBER',
+    });
+  }
+
+  static hasLinkedDeadlines() {
+    return new ConflictException(
+      'This course has deadlines linked to it and cannot be deleted. Archive it instead.',
+      {
+        code: 'COURSE_HAS_LINKED_DEADLINES',
+      },
+    );
+  }
+}
+
+export class DeadlineErrors {
+  static notFound() {
+    return new NotFoundException('Deadline not found.', {
+      code: 'DEADLINE_NOT_FOUND',
+    });
+  }
+
+  static notOwner() {
+    return new ForbiddenException(
+      'Only the course owner can perform this action.',
+      {
+        code: 'NOT_COURSE_OWNER',
+      },
+    );
+  }
+
+  static checklistItemNotFound() {
+    return new NotFoundException('Checklist item not found.', {
+      code: 'CHECKLIST_ITEM_NOT_FOUND',
+    });
   }
 }

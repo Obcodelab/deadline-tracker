@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import crypto from 'crypto';
+import { plainToInstance } from 'class-transformer';
 import {
   ForgotPasswordDto,
   LoginDto,
@@ -10,6 +11,7 @@ import {
   SignUpDto,
   VerifyOtpDto,
 } from '../dtos/auth.dto';
+import { LoginResponseDto, TokenPairResponseDto } from '../dtos/auth-response.dto';
 import { PrismaService } from '../../prisma/prisma.service';
 import { UsersService } from '../../users/services/users.service';
 import { JwtService } from '@nestjs/jwt';
@@ -98,7 +100,9 @@ export class AuthService {
 
     await this.usersService.updateRefreshToken(user.id, tokens.refreshToken);
 
-    return tokens;
+    return plainToInstance(TokenPairResponseDto, tokens, {
+      excludeExtraneousValues: true,
+    });
   }
 
   async signup(dto: SignUpDto) {
@@ -176,11 +180,11 @@ export class AuthService {
     await this.usersService.updateRefreshToken(user.id, tokens.refreshToken);
     await this.usersService.updateLastLogin(user.id);
 
-    return {
-      id: user.id,
-      fullName: user.fullName,
-      ...tokens,
-    };
+    return plainToInstance(
+      LoginResponseDto,
+      { id: user.id, fullName: user.fullName, ...tokens },
+      { excludeExtraneousValues: true },
+    );
   }
 
   async resendOtp(dto: ResendOtpDto) {
@@ -321,11 +325,11 @@ export class AuthService {
     await this.usersService.updateRefreshToken(user.id, tokens.refreshToken);
     await this.usersService.updateLastLogin(user.id);
 
-    return {
-      id: user.id,
-      fullName: user.fullName,
-      ...tokens,
-    };
+    return plainToInstance(
+      LoginResponseDto,
+      { id: user.id, fullName: user.fullName, ...tokens },
+      { excludeExtraneousValues: true },
+    );
   }
 
   async googleLogin(profile: GoogleProfile) {
