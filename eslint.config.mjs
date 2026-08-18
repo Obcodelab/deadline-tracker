@@ -32,4 +32,27 @@ export default tseslint.config(
       "prettier/prettier": ["error", { endOfLine: "auto" }],
     },
   },
+  {
+    files: ['**/*.spec.ts'],
+    rules: {
+      // @types/jest types matchers like expect.objectContaining(...) as
+      // `any`, and passing a mocked class method to expect(...) without
+      // calling it is the normal jest assertion style — both trip these
+      // type-checked rules on otherwise-correct test code.
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/unbound-method': 'off',
+    },
+  },
+  {
+    files: ['test/**/*.ts'],
+    rules: {
+      // supertest's Response#body is typed `any` — every e2e assertion on
+      // the JSON payload trips these type-checked rules on otherwise-correct
+      // test code.
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+    },
+  },
 );
