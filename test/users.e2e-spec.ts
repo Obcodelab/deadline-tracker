@@ -84,6 +84,46 @@ describe('Users (e2e)', () => {
       });
   });
 
+  describe('reminder-preferences', () => {
+    it('defaults to both channels for a new user', async () => {
+      const res = await authed(app, user).get('/users/get-profile').expect(200);
+
+      expect(res.body.data.reminderChannels.sort()).toEqual([
+        'EMAIL',
+        'IN_APP',
+      ]);
+    });
+
+    it('updates the chosen channels', async () => {
+      const res = await authed(app, user)
+        .patch('/users/reminder-preferences')
+        .send({ channels: ['EMAIL'] })
+        .expect(200);
+
+      expect(res.body.data.reminderChannels).toEqual(['EMAIL']);
+    });
+
+    it('rejects an empty channel list', async () => {
+      await authed(app, user)
+        .patch('/users/reminder-preferences')
+        .send({ channels: [] })
+        .expect(400)
+        .expect((res) => {
+          expect(res.body.error).toMatchObject({ code: 'VALIDATION_ERROR' });
+        });
+    });
+
+    it('rejects an unknown channel value', async () => {
+      await authed(app, user)
+        .patch('/users/reminder-preferences')
+        .send({ channels: ['SMS'] })
+        .expect(400)
+        .expect((res) => {
+          expect(res.body.error).toMatchObject({ code: 'VALIDATION_ERROR' });
+        });
+    });
+  });
+
   describe('change-password', () => {
     it('rejects an incorrect current password', async () => {
       await authed(app, user)

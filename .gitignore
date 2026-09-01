@@ -35,8 +35,8 @@ lerna-debug.log*
 !.vscode/launch.json
 !.vscode/extensions.json
 
-# PRD
-Assignment_Deadline_Tracker_PRD.md
+# Documentation
+docs/
 
 # dotenv environment variable files
 .env

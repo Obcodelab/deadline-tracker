@@ -1,6 +1,6 @@
 import { Test } from '@nestjs/testing';
 import * as bcrypt from 'bcrypt';
-import { OAuthProvider, User } from '@prisma/client';
+import { OAuthProvider, ReminderChannel, User } from '@prisma/client';
 import { UsersService } from './users.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import {
@@ -173,6 +173,36 @@ describe('UsersService', () => {
         fullName: 'Ada L.',
         department: 'Computer Science',
         bio: 'Loves algorithms',
+      });
+    });
+  });
+
+  describe('updateReminderPreferences', () => {
+    it('stores the chosen channels and returns the mapped profile', async () => {
+      prisma.user.update.mockResolvedValue({
+        id: 'user-1',
+        fullName: 'Ada Lovelace',
+        emailAddress: 'student@example.com',
+        department: null,
+        faculty: null,
+        bio: null,
+        isEmailVerified: true,
+        reminderChannels: [ReminderChannel.IN_APP],
+        createdAt: new Date('2026-01-01T00:00:00.000Z'),
+      });
+
+      const result = await service.updateReminderPreferences('user-1', {
+        channels: [ReminderChannel.IN_APP],
+      });
+
+      expect(prisma.user.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'user-1' },
+          data: { reminderChannels: [ReminderChannel.IN_APP] },
+        }),
+      );
+      expect(result).toMatchObject({
+        reminderChannels: [ReminderChannel.IN_APP],
       });
     });
   });

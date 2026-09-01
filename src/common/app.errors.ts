@@ -195,6 +195,14 @@ export class CourseErrors {
   }
 }
 
+export class NotificationErrors {
+  static notFound() {
+    return new NotFoundException('Notification not found.', {
+      code: 'NOTIFICATION_NOT_FOUND',
+    });
+  }
+}
+
 export class DeadlineErrors {
   static notFound() {
     return new NotFoundException('Deadline not found.', {

@@ -24,3 +24,8 @@ enum Priority {
   MEDIUM
   HIGH
 }
+
+enum ReminderChannel {
+  IN_APP
+  EMAIL
+}

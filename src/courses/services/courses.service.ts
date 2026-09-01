@@ -20,6 +20,7 @@ import {
   buildPaginationMeta,
   getPaginationParams,
 } from '../../common/pagination.util';
+import { RemindersService } from '../../reminders/services/reminders.service';
 
 const JOIN_CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const JOIN_CODE_LENGTH = 8;
@@ -30,6 +31,7 @@ export class CoursesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly usersService: UsersService,
+    private readonly remindersService: RemindersService,
   ) {}
 
   private generateJoinCodeCandidate(): string {
@@ -277,6 +279,8 @@ export class CoursesService {
       },
     });
 
+    await this.remindersService.createRemindersForNewMember(course.id, userId);
+
     return null;
   }
 
@@ -291,7 +295,7 @@ export class CoursesService {
           select: { id: true, fullName: true, emailAddress: true },
         },
       },
-      orderBy: { joinedAt: 'asc' },
+      orderBy: { joinedAt: 'desc' },
     });
 
     const results = members.map((member) => ({

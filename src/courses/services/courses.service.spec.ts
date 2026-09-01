@@ -3,6 +3,7 @@ import { AcademicTerm, CourseRole } from '@prisma/client';
 import { CoursesService } from './courses.service';
 import { UsersService } from '../../users/services/users.service';
 import { PrismaService } from '../../prisma/prisma.service';
+import { RemindersService } from '../../reminders/services/reminders.service';
 import {
   createMockPrismaService,
   MockPrismaService,
@@ -28,6 +29,7 @@ describe('CoursesService', () => {
   let service: CoursesService;
   let prisma: MockPrismaService;
   let usersService: jest.Mocked<UsersService>;
+  let remindersService: jest.Mocked<RemindersService>;
 
   beforeEach(async () => {
     prisma = createMockPrismaService();
@@ -37,11 +39,16 @@ describe('CoursesService', () => {
         CoursesService,
         { provide: PrismaService, useValue: prisma },
         { provide: UsersService, useValue: { findById: jest.fn() } },
+        {
+          provide: RemindersService,
+          useValue: { createRemindersForNewMember: jest.fn() },
+        },
       ],
     }).compile();
 
     service = module.get(CoursesService);
     usersService = module.get(UsersService);
+    remindersService = module.get(RemindersService);
   });
 
   afterEach(() => {
@@ -387,6 +394,10 @@ describe('CoursesService', () => {
           role: CourseRole.MEMBER,
         },
       });
+      expect(remindersService.createRemindersForNewMember).toHaveBeenCalledWith(
+        'course-1',
+        'user-1',
+      );
       expect(result).toBeNull();
     });
   });

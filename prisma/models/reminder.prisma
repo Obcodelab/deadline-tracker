@@ -1,0 +1,17 @@
+model Reminder {
+  pkid          Int             @unique @default(autoincrement())
+  id            String          @id @default(uuid()) @db.Uuid
+  deadlineId    String          @db.Uuid
+  deadline      Deadline        @relation(fields: [deadlineId], references: [id], onDelete: Cascade)
+  userId        String          @db.Uuid
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  offsetMinutes Int
+  channel       ReminderChannel
+  sentAt        DateTime?
+  isRead        Boolean         @default(false)
+  createdAt     DateTime        @default(now())
+
+  @@unique([deadlineId, userId, offsetMinutes, channel])
+  @@index([userId, sentAt])
+  @@map("reminders")
+}

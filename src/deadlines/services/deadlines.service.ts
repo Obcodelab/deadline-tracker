@@ -21,6 +21,7 @@ import {
   buildPaginationMeta,
   getPaginationParams,
 } from '../../common/pagination.util';
+import { RemindersService } from '../../reminders/services/reminders.service';
 
 const DEADLINE_INCLUDE = {
   course: { select: { id: true, name: true, code: true, color: true } },
@@ -45,6 +46,7 @@ export class DeadlinesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly coursesService: CoursesService,
+    private readonly remindersService: RemindersService,
   ) {}
 
   private combineDueAt(dueDate: string, dueTime: string): Date {
@@ -178,6 +180,11 @@ export class DeadlinesService {
       });
     });
 
+    await this.remindersService.createRemindersForDeadline(
+      deadline.id,
+      deadline.courseId,
+    );
+
     return this.toResponseDto(deadline);
   }
 
@@ -305,6 +312,14 @@ export class DeadlinesService {
       },
       include: DEADLINE_INCLUDE,
     });
+
+    if (dueAt !== undefined || dto.completed !== undefined) {
+      await this.remindersService.syncRemindersForDeadline(
+        updated.id,
+        updated.courseId,
+        updated.completedAt,
+      );
+    }
 
     return this.toResponseDto(updated);
   }

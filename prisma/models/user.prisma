@@ -17,6 +17,8 @@ model User {
   ownedCourses           Course[]
   courseMemberships      CourseMember[]
   createdDeadlines       Deadline[]
+  reminders              Reminder[]
+  reminderChannels       ReminderChannel[]   @default([IN_APP, EMAIL])
   createdAt              DateTime            @default(now())
   updatedAt              DateTime            @updatedAt
 

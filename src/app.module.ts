@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { ScheduleModule } from '@nestjs/schedule';
 import configuration from './config/configuration';
 import { envValidationSchema } from './config/env.validation';
 import { PrismaModule } from './prisma/prisma.module';
@@ -10,6 +11,7 @@ import { UsersModule } from './users/users.module';
 import { CoursesModule } from './courses/courses.module';
 import { DeadlinesModule } from './deadlines/deadlines.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { RemindersModule } from './reminders/reminders.module';
 import { AppThrottlerGuard } from './common/app-throttler.guard';
 
 @Module({
@@ -26,12 +28,14 @@ import { AppThrottlerGuard } from './common/app-throttler.guard';
         limit: 20,
       },
     ]),
+    ScheduleModule.forRoot(),
     PrismaModule,
     AuthModule,
     UsersModule,
     CoursesModule,
     DeadlinesModule,
     DashboardModule,
+    RemindersModule,
   ],
   providers: [
     {

@@ -19,6 +19,7 @@ export interface MockPrismaService {
   courseMember: MockPrismaModel;
   deadline: MockPrismaModel;
   checklistItem: MockPrismaModel;
+  reminder: MockPrismaModel;
   $transaction: jest.Mock;
 }
 
@@ -51,6 +52,7 @@ export function createMockPrismaService(): MockPrismaService {
     courseMember: createMockModel(),
     deadline: createMockModel(),
     checklistItem: createMockModel(),
+    reminder: createMockModel(),
   } as MockPrismaService;
 
   mock.$transaction = jest.fn(

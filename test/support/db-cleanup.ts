@@ -6,6 +6,7 @@ import { PrismaService } from '../../src/prisma/prisma.service';
  * runs.
  */
 export async function cleanupDatabase(prisma: PrismaService): Promise<void> {
+  await prisma.reminder.deleteMany();
   await prisma.checklistItem.deleteMany();
   await prisma.deadline.deleteMany();
   await prisma.courseMember.deleteMany();

@@ -3,6 +3,7 @@ import { DeadlineType, Priority } from '@prisma/client';
 import { DeadlinesService } from './deadlines.service';
 import { CoursesService } from '../../courses/services/courses.service';
 import { PrismaService } from '../../prisma/prisma.service';
+import { RemindersService } from '../../reminders/services/reminders.service';
 import {
   createMockPrismaService,
   MockPrismaService,
@@ -33,6 +34,7 @@ describe('DeadlinesService', () => {
   let service: DeadlinesService;
   let prisma: MockPrismaService;
   let coursesService: jest.Mocked<CoursesService>;
+  let remindersService: jest.Mocked<RemindersService>;
 
   beforeEach(async () => {
     prisma = createMockPrismaService();
@@ -45,11 +47,19 @@ describe('DeadlinesService', () => {
           provide: CoursesService,
           useValue: { assertOwner: jest.fn(), assertMember: jest.fn() },
         },
+        {
+          provide: RemindersService,
+          useValue: {
+            createRemindersForDeadline: jest.fn(),
+            syncRemindersForDeadline: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
     service = module.get(DeadlinesService);
     coursesService = module.get(CoursesService);
+    remindersService = module.get(RemindersService);
 
     jest.useFakeTimers({ now: NOW });
   });
@@ -168,6 +178,10 @@ describe('DeadlinesService', () => {
         course: { id: 'course-1', name: 'English' },
         progress: { completed: 1, total: 2 },
       });
+      expect(remindersService.createRemindersForDeadline).toHaveBeenCalledWith(
+        'deadline-1',
+        'course-1',
+      );
     });
   });
 
@@ -338,12 +352,18 @@ describe('DeadlinesService', () => {
           }),
         }),
       );
+      expect(remindersService.syncRemindersForDeadline).toHaveBeenCalledWith(
+        'deadline-1',
+        'course-1',
+        null,
+      );
     });
 
     it('sets completedAt to a Date when marking complete', async () => {
       prisma.deadline.findUnique.mockResolvedValue(buildDeadline());
       coursesService.assertOwner.mockResolvedValue(undefined);
-      prisma.deadline.update.mockResolvedValue(buildDeadline());
+      const completedAt = new Date('2026-08-18T12:00:00.000Z');
+      prisma.deadline.update.mockResolvedValue(buildDeadline({ completedAt }));
 
       await service.update('deadline-1', 'user-1', { completed: true });
 
@@ -351,6 +371,11 @@ describe('DeadlinesService', () => {
         expect.objectContaining({
           data: expect.objectContaining({ completedAt: expect.any(Date) }),
         }),
+      );
+      expect(remindersService.syncRemindersForDeadline).toHaveBeenCalledWith(
+        'deadline-1',
+        'course-1',
+        completedAt,
       );
     });
 
@@ -366,9 +391,14 @@ describe('DeadlinesService', () => {
           data: expect.objectContaining({ completedAt: null }),
         }),
       );
+      expect(remindersService.syncRemindersForDeadline).toHaveBeenCalledWith(
+        'deadline-1',
+        'course-1',
+        null,
+      );
     });
 
-    it('leaves completedAt untouched when not specified', async () => {
+    it('leaves completedAt untouched and does not resync reminders for an unrelated field edit', async () => {
       prisma.deadline.findUnique.mockResolvedValue(buildDeadline());
       coursesService.assertOwner.mockResolvedValue(undefined);
       prisma.deadline.update.mockResolvedValue(buildDeadline());
@@ -380,6 +410,7 @@ describe('DeadlinesService', () => {
           data: expect.objectContaining({ completedAt: undefined }),
         }),
       );
+      expect(remindersService.syncRemindersForDeadline).not.toHaveBeenCalled();
     });
   });
 

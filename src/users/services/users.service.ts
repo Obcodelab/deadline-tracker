@@ -3,7 +3,11 @@ import * as bcrypt from 'bcrypt';
 import { plainToInstance } from 'class-transformer';
 import { PrismaService } from '../../prisma/prisma.service';
 import { OAuthProvider, User } from '@prisma/client';
-import { ChangePasswordDto, UpdateProfileDto } from '../dtos/user.dto';
+import {
+  ChangePasswordDto,
+  UpdateProfileDto,
+  UpdateReminderPreferencesDto,
+} from '../dtos/user.dto';
 import { UserProfileResponseDto } from '../dtos/user-response.dto';
 import { AuthErrors, UserErrors } from '../../common/app.errors';
 
@@ -57,6 +61,7 @@ export class UsersService {
         faculty: true,
         bio: true,
         isEmailVerified: true,
+        reminderChannels: true,
         createdAt: true,
       },
     });
@@ -90,6 +95,32 @@ export class UsersService {
         faculty: true,
         bio: true,
         isEmailVerified: true,
+        reminderChannels: true,
+        createdAt: true,
+      },
+    });
+
+    return plainToInstance(UserProfileResponseDto, user, {
+      excludeExtraneousValues: true,
+    });
+  }
+
+  async updateReminderPreferences(
+    userId: string,
+    dto: UpdateReminderPreferencesDto,
+  ) {
+    const user = await this.prisma.user.update({
+      where: { id: userId },
+      data: { reminderChannels: dto.channels },
+      select: {
+        id: true,
+        fullName: true,
+        emailAddress: true,
+        department: true,
+        faculty: true,
+        bio: true,
+        isEmailVerified: true,
+        reminderChannels: true,
         createdAt: true,
       },
     });

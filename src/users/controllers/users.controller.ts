@@ -2,7 +2,11 @@ import { Body, Controller, Get, Patch, Post, UseGuards } from '@nestjs/common';
 import { UsersService } from '../services/users.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CurrentUser, SuccessMessage } from '../../common/app.decorator';
-import { ChangePasswordDto, UpdateProfileDto } from '../dtos/user.dto';
+import {
+  ChangePasswordDto,
+  UpdateProfileDto,
+  UpdateReminderPreferencesDto,
+} from '../dtos/user.dto';
 import type { JwtUser } from '../../auth/interfaces/jwt-payload.interface';
 
 @Controller('users')
@@ -20,6 +24,15 @@ export class UsersController {
   @SuccessMessage('Profile updated successfully.')
   updateProfile(@CurrentUser() user: JwtUser, @Body() dto: UpdateProfileDto) {
     return this.usersService.updateProfile(user.id, dto);
+  }
+
+  @Patch('reminder-preferences')
+  @SuccessMessage('Reminder preferences updated successfully.')
+  updateReminderPreferences(
+    @CurrentUser() user: JwtUser,
+    @Body() dto: UpdateReminderPreferencesDto,
+  ) {
+    return this.usersService.updateReminderPreferences(user.id, dto);
   }
 
   @Post('change-password')

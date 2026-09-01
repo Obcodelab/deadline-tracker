@@ -1,4 +1,5 @@
 import { Exclude, Expose } from 'class-transformer';
+import { ReminderChannel } from '@prisma/client';
 
 @Exclude()
 export class UserProfileResponseDto {
@@ -22,6 +23,9 @@ export class UserProfileResponseDto {
 
   @Expose()
   isEmailVerified: boolean;
+
+  @Expose()
+  reminderChannels: ReminderChannel[];
 
   @Expose()
   createdAt: Date;

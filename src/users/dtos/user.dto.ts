@@ -1,10 +1,15 @@
 import {
+  ArrayMinSize,
+  ArrayUnique,
+  IsArray,
+  IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString,
   Matches,
   MaxLength,
 } from 'class-validator';
+import { ReminderChannel } from '@prisma/client';
 
 export class UpdateProfileDto {
   @IsOptional()
@@ -40,4 +45,14 @@ export class ChangePasswordDto {
     },
   )
   newPassword: string;
+}
+
+export class UpdateReminderPreferencesDto {
+  @IsArray()
+  @ArrayMinSize(1, {
+    message: 'Select at least one reminder channel.',
+  })
+  @ArrayUnique()
+  @IsEnum(ReminderChannel, { each: true })
+  channels: ReminderChannel[];
 }
