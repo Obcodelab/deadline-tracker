@@ -2,7 +2,7 @@ import { Test } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
-import { OAuthProvider, User } from '@prisma/client';
+import { OAuthProvider, ReminderChannel, User } from '@prisma/client';
 import { AuthService } from './auth.service';
 import { UsersService } from '../../users/services/users.service';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -31,6 +31,7 @@ function buildUser(overrides: Partial<User> = {}): User {
     passwordResetToken: null,
     passwordResetExpiresAt: null,
     hashedRefreshToken: null,
+    reminderChannels: [ReminderChannel.IN_APP, ReminderChannel.EMAIL],
     createdAt: new Date('2026-01-01T00:00:00.000Z'),
     updatedAt: new Date('2026-01-01T00:00:00.000Z'),
     ...overrides,

@@ -255,6 +255,17 @@ describe('Notifications / Reminders (e2e)', () => {
     return item.id as string;
   }
 
+  /** A deadline due this soon crosses both default offsets (24h, 1h) at
+   * once, so it fires as two separate notification rows, not one. */
+  async function findAllNotificationIds(title: string): Promise<string[]> {
+    const res = await authed(app, owner).get('/notifications').expect(200);
+    return res.body.data.items
+      .filter(
+        (i: { deadline: { title: string } }) => i.deadline.title === title,
+      )
+      .map((i: { id: string }) => i.id);
+  }
+
   describe('isRead', () => {
     it('defaults new notifications to unread', async () => {
       await createFiredNotification('Unread by default');
@@ -304,20 +315,29 @@ describe('Notifications / Reminders (e2e)', () => {
     });
 
     it('filters to only unread notifications with ?unread=true', async () => {
-      const readId = await createFiredNotification('Already read');
+      await createFiredNotification('Already read');
       await createFiredNotification('Still unread');
 
-      await authed(app, owner)
-        .patch(`/notifications/${readId}`)
-        .send({ isRead: true })
-        .expect(200);
+      const readIds = await findAllNotificationIds('Already read');
+      for (const id of readIds) {
+        await authed(app, owner)
+          .patch(`/notifications/${id}`)
+          .send({ isRead: true })
+          .expect(200);
+      }
 
       const res = await authed(app, owner)
         .get('/notifications?unread=true')
         .expect(200);
 
-      expect(res.body.data.items).toHaveLength(1);
-      expect(res.body.data.items[0].deadline.title).toBe('Still unread');
+      const stillUnreadIds = await findAllNotificationIds('Still unread');
+      expect(res.body.data.items).toHaveLength(stillUnreadIds.length);
+      expect(
+        res.body.data.items.every(
+          (i: { deadline: { title: string } }) =>
+            i.deadline.title === 'Still unread',
+        ),
+      ).toBe(true);
     });
   });
 

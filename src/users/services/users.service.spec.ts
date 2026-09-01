@@ -28,6 +28,7 @@ function buildUser(overrides: Partial<User> = {}): User {
     passwordResetToken: null,
     passwordResetExpiresAt: null,
     hashedRefreshToken: null,
+    reminderChannels: [ReminderChannel.IN_APP, ReminderChannel.EMAIL],
     createdAt: new Date('2026-01-01T00:00:00.000Z'),
     updatedAt: new Date('2026-01-01T00:00:00.000Z'),
     ...overrides,
