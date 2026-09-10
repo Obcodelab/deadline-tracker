@@ -1,98 +1,133 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Assignment & Deadline Tracker
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+The main TypeScript/NestJS project for the SIWES portfolio — the backend for a
+tool that gives students one place to track everything due across their courses.
+Users create or join courses, add deadlines (assignments, exams, milestones)
+with a checklist and priority, and get reminders before each one is due. A
+dashboard rolls up what is upcoming and overdue.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+It is a REST API built on NestJS 11 and Prisma 7 over PostgreSQL, with
+email/password and Google OAuth authentication, JWT access/refresh tokens,
+request throttling, and a scheduled job that dispatches reminders.
 
-## Description
+## Stack
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- **NestJS 11** — modules, controllers, providers, guards, interceptors, filters
+- **Prisma 7** over **PostgreSQL** — schema split across `prisma/`, migrations in `prisma/migrations/`
+- **Passport** — JWT strategy (access + refresh) and Google OAuth 2.0
+- **@nestjs/schedule** — cron job for reminder dispatch
+- **@nestjs/throttler** — global rate limiting (20 requests / 60s)
+- **Joi** — startup validation of environment variables
+- **Jest** + **supertest** — unit and end-to-end tests
+- **pnpm** — package manager
 
-## Project setup
+## Configuration
 
-```bash
-$ pnpm install
-```
+There is no `.env.example`; create `.env` in the project root with:
 
-## Compile and run the project
+| variable | meaning |
+| --- | --- |
+| `PORT` | HTTP port (default `8000`) |
+| `NODE_ENV` | `development`, `production`, or `test` |
+| `DATABASE_URL` | PostgreSQL connection string |
+| `JWT_ACCESS_SECRET` / `JWT_ACCESS_EXPIRES_IN` | access-token signing key and lifetime (e.g. `15m`) |
+| `JWT_REFRESH_SECRET` / `JWT_REFRESH_EXPIRES_IN` | refresh-token signing key and lifetime (e.g. `7d`) |
+| `FRONTEND_URL` | base URL of the web client (used in OAuth redirects) |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` / `GOOGLE_CALLBACK_URL` | Google OAuth credentials |
+| `CORS_ORIGINS` | JSON array of allowed origins, e.g. `["http://localhost:3000"]` |
 
-```bash
-# development
-$ pnpm run start
+The app validates these on boot and refuses to start if any are missing or
+malformed. For the e2e tests, add a `.env.test` with the same keys pointing at a
+separate throwaway database.
 
-# watch mode
-$ pnpm run start:dev
-
-# production mode
-$ pnpm run start:prod
-```
-
-## Run tests
+## Setup
 
 ```bash
-# unit tests
-$ pnpm run test
-
-# e2e tests
-$ pnpm run test:e2e
-
-# test coverage
-$ pnpm run test:cov
+pnpm install
+pnpm prisma format            # tidy the schema files
+pnpm prisma validate          # check the schema is valid
+pnpm prisma migrate dev       # apply prisma/migrations to the database
+pnpm prisma generate          # (re)build the Prisma client
 ```
 
-## Deployment
+`migrate dev` already runs `generate` at the end, so that last step is
+belt-and-suspenders here — but keeping it means the same routine still works with
+`migrate deploy` (production), which does not generate the client.
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## Running
 
 ```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
+pnpm run start:dev            # watch mode
+pnpm run start                # one-off
+pnpm run start:prod           # run the compiled build (after pnpm run build)
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+The API listens on `http://localhost:8000` by default.
 
-## Resources
+## Tests
 
-Check out a few resources that may come in handy when working with NestJS:
+```bash
+pnpm run test                 # unit tests (*.spec.ts under src/)
+pnpm run test:cov             # unit tests with coverage
+NODE_ENV=test pnpm run test:e2e   # end-to-end tests (test/*.e2e-spec.ts)
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+The e2e suite boots the real application with the same pipes, filters, and
+interceptors as `main.ts` and runs against the `.env.test` database. Each spec
+file wipes all tables before it runs, so point it at a database you do not mind
+losing. Setting `NODE_ENV=test` is what makes the app load `.env.test` instead
+of `.env`.
 
-## Support
+## Project structure
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```
+deadline-tracker/
+├── prisma/
+│   ├── schema.prisma          # datasource + generator
+│   ├── enums.prisma           # shared enums
+│   ├── models/                # one file per model (user, course, deadline, …)
+│   └── migrations/            # migration history
+└── src/
+    ├── main.ts                # bootstrap: helmet, CORS, global pipe/filter/interceptors
+    ├── app.module.ts          # config, throttler, schedule, feature modules
+    ├── config/                # env loading (configuration.ts) + Joi validation
+    ├── common/                # response envelope, exception filter, throttler guard, pagination
+    ├── prisma/                # PrismaModule + PrismaService
+    ├── auth/                  # signup, OTP verify, login, password reset, Google OAuth, JWT
+    ├── users/                 # profile, password change, reminder-channel preferences, logout
+    ├── courses/               # create/join courses, membership, roles (owner/member)
+    ├── deadlines/             # deadlines CRUD + checklist items
+    ├── dashboard/             # upcoming / overdue rollup
+    └── reminders/             # notifications endpoints + cron-driven reminder dispatch
+```
 
-## Stay in touch
+## API surface
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+All responses are wrapped in a consistent envelope:
 
-## License
+```json
+{ "status": "success", "message": "Request successful.", "data": {}, "error": null }
+```
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Errors use the same shape with `status: "error"` and an `error` object
+(`{ code, detail }`). Validation failures return `code: "VALIDATION_ERROR"` with
+a per-field breakdown.
+
+| area | routes |
+| --- | --- |
+| `auth` | `POST /auth/signup`, `/verify-otp`, `/resend-otp`, `/forgot-password`, `/reset-password`, `/login`, `/refresh-token`; `GET /auth/google/login`, `/auth/google/callback` |
+| `users` | `GET /users/get-profile`; `PATCH /users/update-profile`, `/reminder-preferences`; `POST /users/change-password`, `/logout` |
+| `courses` | `POST /courses`, `/courses/join`; `GET /courses`, `/courses/:id`, `/courses/:id/members`; `PATCH /courses/:id`; `DELETE /courses/:id` |
+| `deadlines` | `POST /deadlines`, `/deadlines/:id/checklist`; `GET /deadlines`, `/deadlines/:id`; `PATCH /deadlines/:id`; `DELETE /deadlines/:id` |
+| `checklist` | `PATCH /checklist/:id`; `DELETE /checklist/:id` |
+| `dashboard` | `GET /dashboard` |
+| `notifications` | `GET /notifications`; `PATCH /notifications/read-all`, `/notifications/:id` |
+
+## Data model
+
+- **User** — email/password or Google account, profile fields, refresh-token hash, default reminder channels
+- **Course** — name, code, term, colour, unique join code, an owner and `CourseMember`s (`OWNER` / `MEMBER`)
+- **Deadline** — belongs to a course; type (`ASSIGNMENT` / `EXAM` / `MILESTONE`), `dueAt`, priority, optional `completedAt`
+- **ChecklistItem** — ordered sub-tasks under a deadline
+- **Reminder** — per user, per deadline, at an offset before `dueAt`, on a channel (`IN_APP` / `EMAIL`); a cron job runs every 5 minutes, marks due ones `sentAt`, and (for `EMAIL`) logs a stub email to the console
+- **VerificationToken** — one-time codes for email verification and password reset
