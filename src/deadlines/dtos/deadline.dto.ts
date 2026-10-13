@@ -1,119 +1,58 @@
-import {
-  IsArray,
-  IsBoolean,
-  IsDateString,
-  IsEnum,
-  IsIn,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  IsUUID,
-  Matches,
-  ValidateNested,
-} from 'class-validator';
-import { Type } from 'class-transformer';
+import { z } from 'zod';
 import { DeadlineType, Priority } from '@prisma/client';
-import type { DeadlineStatus } from './deadline-response.dto';
-import { PaginationQueryDto } from '../../common/dtos/pagination-query.dto';
+import { PaginationQuerySchema } from '../../common/dtos/pagination-query.dto';
 
 const TIME_REGEX = /^([01]\d|2[0-3]):([0-5]\d)$/;
+const DueTimeSchema = z
+  .string()
+  .regex(TIME_REGEX, 'dueTime must be in HH:mm 24-hour format.');
+const DateStringSchema = z
+  .string()
+  .refine(
+    (value) => !Number.isNaN(Date.parse(value)),
+    'must be a valid date string',
+  );
 
-export class CreateDeadlineDto {
-  @IsString()
-  @IsNotEmpty()
-  title: string;
+export const CreateChecklistItemSchema = z
+  .object({ text: z.string().nonempty() })
+  .strict();
 
-  @IsEnum(DeadlineType)
-  type: DeadlineType;
+export const CreateDeadlineSchema = z
+  .object({
+    title: z.string().nonempty(),
+    type: z.enum(DeadlineType),
+    courseId: z.uuid(),
+    dueDate: z.iso.date(),
+    dueTime: DueTimeSchema,
+    priority: z.enum(Priority),
+    description: z.string().optional(),
+    checklistItems: z.array(CreateChecklistItemSchema).optional(),
+  })
+  .strict();
 
-  @IsUUID()
-  courseId: string;
+export const UpdateDeadlineSchema = CreateDeadlineSchema.omit({
+  courseId: true,
+  checklistItems: true,
+})
+  .partial()
+  .extend({ completed: z.boolean().optional() })
+  .strict();
 
-  @IsDateString()
-  dueDate: string;
+export const ToggleChecklistItemSchema = z
+  .object({ isComplete: z.boolean() })
+  .strict();
 
-  @Matches(TIME_REGEX, { message: 'dueTime must be in HH:mm 24-hour format.' })
-  dueTime: string;
+export const ListDeadlinesQuerySchema = PaginationQuerySchema.extend({
+  course: z.uuid().optional(),
+  status: z.enum(['upcoming', 'due_today', 'overdue', 'completed']).optional(),
+  type: z.enum(DeadlineType).optional(),
+  from: DateStringSchema.optional(),
+  to: DateStringSchema.optional(),
+  search: z.string().nonempty().optional(),
+}).strict();
 
-  @IsEnum(Priority)
-  priority: Priority;
-
-  @IsOptional()
-  @IsString()
-  description?: string;
-
-  @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => CreateChecklistItemDto)
-  checklistItems?: CreateChecklistItemDto[];
-}
-
-export class UpdateDeadlineDto {
-  @IsOptional()
-  @IsString()
-  @IsNotEmpty()
-  title?: string;
-
-  @IsOptional()
-  @IsEnum(DeadlineType)
-  type?: DeadlineType;
-
-  @IsOptional()
-  @IsDateString()
-  dueDate?: string;
-
-  @IsOptional()
-  @Matches(TIME_REGEX, { message: 'dueTime must be in HH:mm 24-hour format.' })
-  dueTime?: string;
-
-  @IsOptional()
-  @IsEnum(Priority)
-  priority?: Priority;
-
-  @IsOptional()
-  @IsString()
-  description?: string;
-
-  @IsOptional()
-  @IsBoolean()
-  completed?: boolean;
-}
-
-export class CreateChecklistItemDto {
-  @IsString()
-  @IsNotEmpty()
-  text: string;
-}
-
-export class ToggleChecklistItemDto {
-  @IsBoolean()
-  isComplete: boolean;
-}
-
-export class ListDeadlinesQueryDto extends PaginationQueryDto {
-  @IsOptional()
-  @IsUUID()
-  course?: string;
-
-  @IsOptional()
-  @IsIn(['upcoming', 'due_today', 'overdue', 'completed'])
-  status?: DeadlineStatus;
-
-  @IsOptional()
-  @IsEnum(DeadlineType)
-  type?: DeadlineType;
-
-  @IsOptional()
-  @IsDateString()
-  from?: string;
-
-  @IsOptional()
-  @IsDateString()
-  to?: string;
-
-  @IsOptional()
-  @IsString()
-  @IsNotEmpty()
-  search?: string;
-}
+export type CreateChecklistItemDto = z.infer<typeof CreateChecklistItemSchema>;
+export type CreateDeadlineDto = z.infer<typeof CreateDeadlineSchema>;
+export type UpdateDeadlineDto = z.infer<typeof UpdateDeadlineSchema>;
+export type ToggleChecklistItemDto = z.infer<typeof ToggleChecklistItemSchema>;
+export type ListDeadlinesQueryDto = z.infer<typeof ListDeadlinesQuerySchema>;

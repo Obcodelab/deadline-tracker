@@ -1,58 +1,41 @@
-import {
-  ArrayMinSize,
-  ArrayUnique,
-  IsArray,
-  IsEnum,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  Matches,
-  MaxLength,
-} from 'class-validator';
+import { z } from 'zod';
 import { ReminderChannel } from '@prisma/client';
 
-export class UpdateProfileDto {
-  @IsOptional()
-  @IsString()
-  fullName?: string;
+const PASSWORD_REGEX =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&^#()_\-+=])[A-Za-z\d@$!%*?&^#()_\-+=]{8,}$/;
+const PASSWORD_MESSAGE =
+  'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.';
 
-  @IsOptional()
-  @IsString()
-  department?: string;
-
-  @IsOptional()
-  @IsString()
-  faculty?: string;
-
-  @IsOptional()
-  @IsString()
-  @MaxLength(300)
-  bio?: string;
-}
-
-export class ChangePasswordDto {
-  @IsNotEmpty()
-  @IsString()
-  currentPassword: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @Matches(
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&^#()_\-+=])[A-Za-z\d@$!%*?&^#()_\-+=]{8,}$/,
-    {
-      message:
-        'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.',
-    },
-  )
-  newPassword: string;
-}
-
-export class UpdateReminderPreferencesDto {
-  @IsArray()
-  @ArrayMinSize(1, {
-    message: 'Select at least one reminder channel.',
+export const UpdateProfileSchema = z
+  .object({
+    fullName: z.string().optional(),
+    department: z.string().optional(),
+    faculty: z.string().optional(),
+    bio: z.string().max(300).optional(),
   })
-  @ArrayUnique()
-  @IsEnum(ReminderChannel, { each: true })
-  channels: ReminderChannel[];
-}
+  .strict();
+
+export const ChangePasswordSchema = z
+  .object({
+    currentPassword: z.string().nonempty(),
+    newPassword: z.string().regex(PASSWORD_REGEX, PASSWORD_MESSAGE),
+  })
+  .strict();
+
+export const UpdateReminderPreferencesSchema = z
+  .object({
+    channels: z
+      .array(z.enum(ReminderChannel))
+      .min(1, 'Select at least one reminder channel.')
+      .refine(
+        (arr) => new Set(arr).size === arr.length,
+        'channels must be unique.',
+      ),
+  })
+  .strict();
+
+export type UpdateProfileDto = z.infer<typeof UpdateProfileSchema>;
+export type ChangePasswordDto = z.infer<typeof ChangePasswordSchema>;
+export type UpdateReminderPreferencesDto = z.infer<
+  typeof UpdateReminderPreferencesSchema
+>;

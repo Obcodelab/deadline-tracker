@@ -9,9 +9,10 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { ApiOkResponse } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import type { Request, Response } from 'express';
-import {
+import type {
   ForgotPasswordDto,
   LoginDto,
   RefreshTokenDto,
@@ -20,8 +21,23 @@ import {
   SignUpDto,
   VerifyOtpDto,
 } from '../dtos/auth.dto';
+import {
+  ForgotPasswordSchema,
+  LoginSchema,
+  RefreshTokenSchema,
+  ResendOtpSchema,
+  ResetPasswordSchema,
+  SignUpSchema,
+  VerifyOtpSchema,
+} from '../dtos/auth.dto';
+import {
+  LoginResponseDto,
+  TokenPairResponseDto,
+} from '../dtos/auth-response.dto';
 import { AuthService } from '../services/auth.service';
 import { SuccessMessage } from '../../common/app.decorator';
+import { ZodValidationPipe } from '../../common/zod-validation.pipe';
+import { ZodApiBody } from '../../common/zod-api-body.decorator';
 import { GoogleAuthGuard } from '../guards/google-auth.guard';
 import type { GoogleProfile } from '../interfaces/google-profile.interface';
 import { GoogleAuthExceptionFilter } from '../filters/google-auth-exception.filter';
@@ -59,48 +75,63 @@ export class AuthController {
   @Post('signup')
   @Throttle(SENSITIVE_AUTH_THROTTLE)
   @SuccessMessage('Verification code sent successfully.')
-  signup(@Body() dto: SignUpDto) {
+  @ZodApiBody(SignUpSchema)
+  signup(@Body(new ZodValidationPipe(SignUpSchema)) dto: SignUpDto) {
     return this.authService.signup(dto);
   }
 
   @Post('verify-otp')
   @Throttle(SENSITIVE_AUTH_THROTTLE)
   @SuccessMessage('Email verified successfully.')
-  verifyOtp(@Body() dto: VerifyOtpDto) {
+  @ZodApiBody(VerifyOtpSchema)
+  verifyOtp(@Body(new ZodValidationPipe(VerifyOtpSchema)) dto: VerifyOtpDto) {
     return this.authService.verifyOtp(dto);
   }
 
   @Post('resend-otp')
   @Throttle(SENSITIVE_AUTH_THROTTLE)
   @SuccessMessage('Verification code sent successfully.')
-  resendOtp(@Body() dto: ResendOtpDto) {
+  @ZodApiBody(ResendOtpSchema)
+  resendOtp(@Body(new ZodValidationPipe(ResendOtpSchema)) dto: ResendOtpDto) {
     return this.authService.resendOtp(dto);
   }
 
   @Post('forgot-password')
   @Throttle(SENSITIVE_AUTH_THROTTLE)
   @SuccessMessage('Reset link sent successfully.')
-  forgotPassword(@Body() dto: ForgotPasswordDto) {
+  @ZodApiBody(ForgotPasswordSchema)
+  forgotPassword(
+    @Body(new ZodValidationPipe(ForgotPasswordSchema)) dto: ForgotPasswordDto,
+  ) {
     return this.authService.forgotPassword(dto);
   }
 
   @Post('reset-password')
   @Throttle(SENSITIVE_AUTH_THROTTLE)
   @SuccessMessage('Password reset successfully.')
-  resetPassword(@Body() dto: ResetPasswordDto) {
+  @ZodApiBody(ResetPasswordSchema)
+  resetPassword(
+    @Body(new ZodValidationPipe(ResetPasswordSchema)) dto: ResetPasswordDto,
+  ) {
     return this.authService.resetPassword(dto);
   }
 
   @Post('refresh-token')
   @SuccessMessage('Token refreshed successfully.')
-  refreshToken(@Body() dto: RefreshTokenDto) {
+  @ZodApiBody(RefreshTokenSchema)
+  @ApiOkResponse({ type: TokenPairResponseDto })
+  refreshToken(
+    @Body(new ZodValidationPipe(RefreshTokenSchema)) dto: RefreshTokenDto,
+  ) {
     return this.authService.refreshToken(dto);
   }
 
   @Post('login')
   @Throttle(SENSITIVE_AUTH_THROTTLE)
   @SuccessMessage('Login successfully.')
-  login(@Body() dto: LoginDto) {
+  @ZodApiBody(LoginSchema)
+  @ApiOkResponse({ type: LoginResponseDto })
+  login(@Body(new ZodValidationPipe(LoginSchema)) dto: LoginDto) {
     return this.authService.login(dto);
   }
 }

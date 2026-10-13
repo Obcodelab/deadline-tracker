@@ -1,59 +1,28 @@
-import {
-  IsBoolean,
-  IsEnum,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  Matches,
-} from 'class-validator';
+import { z } from 'zod';
 import { AcademicTerm } from '@prisma/client';
 
 const HEX_COLOR_REGEX = /^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{3})$/;
+const ColorSchema = z
+  .string()
+  .regex(HEX_COLOR_REGEX, 'color must be a valid hex color.');
 
-export class CreateCourseDto {
-  @IsString()
-  @IsNotEmpty()
-  name: string;
+export const CreateCourseSchema = z
+  .object({
+    name: z.string().nonempty(),
+    code: z.string().nonempty(),
+    term: z.enum(AcademicTerm),
+    color: ColorSchema,
+  })
+  .strict();
 
-  @IsString()
-  @IsNotEmpty()
-  code: string;
+export const UpdateCourseSchema = CreateCourseSchema.partial()
+  .extend({ archived: z.boolean().optional() })
+  .strict();
 
-  @IsEnum(AcademicTerm)
-  term: AcademicTerm;
+export const JoinCourseSchema = z
+  .object({ joinCode: z.string().nonempty() })
+  .strict();
 
-  @IsString()
-  @Matches(HEX_COLOR_REGEX, { message: 'color must be a valid hex color.' })
-  color: string;
-}
-
-export class UpdateCourseDto {
-  @IsOptional()
-  @IsString()
-  @IsNotEmpty()
-  name?: string;
-
-  @IsOptional()
-  @IsString()
-  @IsNotEmpty()
-  code?: string;
-
-  @IsOptional()
-  @IsEnum(AcademicTerm)
-  term?: AcademicTerm;
-
-  @IsOptional()
-  @IsString()
-  @Matches(HEX_COLOR_REGEX, { message: 'color must be a valid hex color.' })
-  color?: string;
-
-  @IsOptional()
-  @IsBoolean()
-  archived?: boolean;
-}
-
-export class JoinCourseDto {
-  @IsString()
-  @IsNotEmpty()
-  joinCode: string;
-}
+export type CreateCourseDto = z.infer<typeof CreateCourseSchema>;
+export type UpdateCourseDto = z.infer<typeof UpdateCourseSchema>;
+export type JoinCourseDto = z.infer<typeof JoinCourseSchema>;

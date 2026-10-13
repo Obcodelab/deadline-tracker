@@ -6,6 +6,9 @@
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
   },
+  "moduleNameMapper": {
+    "^@nestjs/swagger$": "<rootDir>/support/nestjs-swagger.mock.ts"
+  },
   "testTimeout": 30000,
   "maxWorkers": 1
 }

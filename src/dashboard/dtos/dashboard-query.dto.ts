@@ -1,12 +1,10 @@
-import { IsEnum, IsOptional, IsUUID } from 'class-validator';
+import { z } from 'zod';
 import { DeadlineType } from '@prisma/client';
 
-export class DashboardQueryDto {
-  @IsOptional()
-  @IsUUID()
-  course?: string;
-
-  @IsOptional()
-  @IsEnum(DeadlineType)
-  type?: DeadlineType;
-}
+export const DashboardQuerySchema = z
+  .object({
+    course: z.uuid().optional(),
+    type: z.enum(DeadlineType).optional(),
+  })
+  .strict();
+export type DashboardQueryDto = z.infer<typeof DashboardQuerySchema>;

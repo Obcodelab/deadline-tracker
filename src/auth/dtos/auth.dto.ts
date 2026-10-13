@@ -1,85 +1,55 @@
-import {
-  IsEmail,
-  IsNotEmpty,
-  IsString,
-  IsUUID,
-  Length,
-  Matches,
-} from 'class-validator';
+import { z } from 'zod';
 
-export class SignUpDto {
-  @IsString()
-  @IsNotEmpty()
-  fullName: string;
+const PASSWORD_REGEX =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&^#()_\-+=])[A-Za-z\d@$!%*?&^#()_\-+=]{8,}$/;
+const PASSWORD_MESSAGE =
+  'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.';
 
-  @IsEmail()
-  @IsNotEmpty()
-  emailAddress: string;
+const PasswordSchema = z.string().regex(PASSWORD_REGEX, PASSWORD_MESSAGE);
 
-  @IsString()
-  @IsNotEmpty()
-  @Matches(
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&^#()_\-+=])[A-Za-z\d@$!%*?&^#()_\-+=]{8,}$/,
-    {
-      message:
-        'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.',
-    },
-  )
-  password: string;
-}
+export const SignUpSchema = z
+  .object({
+    fullName: z.string().nonempty(),
+    emailAddress: z.email(),
+    password: PasswordSchema,
+  })
+  .strict();
 
-export class VerifyOtpDto {
-  @IsEmail()
-  @IsNotEmpty()
-  emailAddress: string;
+export const VerifyOtpSchema = z
+  .object({
+    emailAddress: z.email(),
+    code: z.string().length(6),
+  })
+  .strict();
 
-  @IsString()
-  @IsNotEmpty()
-  @Length(6, 6)
-  code: string;
-}
+export const ResendOtpSchema = z.object({ emailAddress: z.email() }).strict();
 
-export class ResendOtpDto {
-  @IsEmail()
-  @IsNotEmpty()
-  emailAddress: string;
-}
+export const ForgotPasswordSchema = z
+  .object({ emailAddress: z.email() })
+  .strict();
 
-export class ForgotPasswordDto {
-  @IsEmail()
-  @IsNotEmpty()
-  emailAddress: string;
-}
+export const ResetPasswordSchema = z
+  .object({
+    token: z.uuid(),
+    password: PasswordSchema,
+  })
+  .strict();
 
-export class ResetPasswordDto {
-  @IsUUID()
-  @IsNotEmpty()
-  token: string;
+export const LoginSchema = z
+  .object({
+    emailAddress: z.email(),
+    password: z.string().nonempty(),
+  })
+  .strict();
 
-  @IsString()
-  @IsNotEmpty()
-  @Matches(
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&^#()_\-+=])[A-Za-z\d@$!%*?&^#()_\-+=]{8,}$/,
-    {
-      message:
-        'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.',
-    },
-  )
-  password: string;
-}
+export const RefreshTokenSchema = z
+  .object({ refreshToken: z.string().nonempty() })
+  .strict();
 
-export class LoginDto {
-  @IsEmail()
-  @IsNotEmpty()
-  emailAddress: string;
-
-  @IsString()
-  @IsNotEmpty()
-  password: string;
-}
-
-export class RefreshTokenDto {
-  @IsString()
-  @IsNotEmpty()
-  refreshToken: string;
-}
+export type SignUpDto = z.infer<typeof SignUpSchema>;
+export type VerifyOtpDto = z.infer<typeof VerifyOtpSchema>;
+export type ResendOtpDto = z.infer<typeof ResendOtpSchema>;
+export type ForgotPasswordDto = z.infer<typeof ForgotPasswordSchema>;
+export type ResetPasswordDto = z.infer<typeof ResetPasswordSchema>;
+export type LoginDto = z.infer<typeof LoginSchema>;
+export type RefreshTokenDto = z.infer<typeof RefreshTokenSchema>;

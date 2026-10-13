@@ -194,7 +194,11 @@ describe('DeadlinesService', () => {
     it('requires membership when filtering by a specific course', async () => {
       coursesService.assertMember.mockResolvedValue({} as never);
 
-      await service.findAll('user-1', { course: 'course-1' });
+      await service.findAll('user-1', {
+        page: 1,
+        limit: 20,
+        course: 'course-1',
+      });
 
       expect(coursesService.assertMember).toHaveBeenCalledWith(
         'course-1',
@@ -208,7 +212,7 @@ describe('DeadlinesService', () => {
     });
 
     it('scopes to the caller memberships when no course filter is given', async () => {
-      await service.findAll('user-1', {});
+      await service.findAll('user-1', { page: 1, limit: 20 });
 
       expect(prisma.deadline.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -220,7 +224,7 @@ describe('DeadlinesService', () => {
     });
 
     it('applies a case-insensitive title search filter', async () => {
-      await service.findAll('user-1', { search: 'essay' });
+      await service.findAll('user-1', { page: 1, limit: 20, search: 'essay' });
 
       expect(prisma.deadline.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -232,7 +236,11 @@ describe('DeadlinesService', () => {
     });
 
     it('filters overdue status to incomplete deadlines due before today', async () => {
-      await service.findAll('user-1', { status: 'overdue' });
+      await service.findAll('user-1', {
+        page: 1,
+        limit: 20,
+        status: 'overdue',
+      });
 
       expect(prisma.deadline.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -245,7 +253,11 @@ describe('DeadlinesService', () => {
     });
 
     it('filters completed status by completedAt not null', async () => {
-      await service.findAll('user-1', { status: 'completed' });
+      await service.findAll('user-1', {
+        page: 1,
+        limit: 20,
+        status: 'completed',
+      });
 
       expect(prisma.deadline.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -256,6 +268,8 @@ describe('DeadlinesService', () => {
 
     it('applies from/to as a due-date range', async () => {
       await service.findAll('user-1', {
+        page: 1,
+        limit: 20,
         from: '2026-08-01T00:00:00.000Z',
         to: '2026-08-31T00:00:00.000Z',
       });
